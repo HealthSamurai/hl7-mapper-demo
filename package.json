@@ -1,0 +1,35 @@
+{
+  "name": "hl7-mapper-demo",
+  "version": "0.0.1",
+  "dependencies": {
+    "js-yaml": "latest",
+    "traverse": "latest",
+    "node-rest-client": "latest",
+    "md5": "latest",
+    "dateformat": "latest",
+    "q": "latest"
+  },
+  "devDependencies": {
+    "coffee-script": "~1.6.3",
+    "gulp": "latest",
+    "gulp-coffee": "latest",
+    "gulp-concat": "latest",
+    "gulp-uglify": "latest",
+    "gulp-sourcemaps": "latest",
+    "browserify": "9.0.4",
+    "vinyl-source-stream": "latest",
+    "vinyl-buffer": "latest",
+    "gulp-browserify": "https://github.com/deepak1556/gulp-browserify/tarball/master",
+    "coffeeify": "~0.5.2",
+    "gulp-webserver": "latest"
+  },
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "scripts": {
+    "build": "`npm bin`/coffee -c -o lib/ src/*.coffee",
+    "watch": "`npm bin`/coffee -c -w -o lib/ src/*.coffee",
+    "test": "./node_modules/.bin/jasmine-node spec --coffee"
+  },
+  "preferGlobal": true
+}
