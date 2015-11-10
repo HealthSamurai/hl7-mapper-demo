@@ -9,12 +9,12 @@ var buffer = require('vinyl-buffer');
 var webserver = require('gulp-webserver');
 
 gulp.task('scripts', function () {
-    return browserify({entries: ['./src/hl7mapper.coffee'], extensions: ['.coffee']})
+    return browserify({entries: ['./src/app.coffee'], extensions: ['.coffee']})
         .transform('coffeeify')
         .bundle()
         .pipe(source('app.js'))
-        // .pipe(buffer())
-        // .pipe(uglify())
+        //.pipe(buffer())
+        //.pipe(uglify())
         .pipe(gulp.dest('./dist'))
 });
 
@@ -29,7 +29,7 @@ gulp.task('server', function() {
 
 // Rerun the task when a file changes
 gulp.task('watch', function() {
-    gulp.watch(paths.scripts, ['scripts']);
+    gulp.watch("src/*", ['scripts']);
 });
 
 // The default task (called when you run `gulp` from cli)

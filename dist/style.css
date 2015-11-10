@@ -1,0 +1,17 @@
+/* STTYLES */
+h2 {
+  margin-top: 0;
+}
+
+.nav-pills {
+  margin-bottom: 10px;
+}
+
+.editors textarea, .editors .CodeMirror {
+  width: 100%;
+  height: 500px;
+}
+
+.editors textarea {
+  font-family: monospace;
+}

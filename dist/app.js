@@ -1,16 +1,37 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var Q, traverse, yaml;
+var app, data, mapper;
 
-yaml = require('js-yaml');
+mapper = require("./hl7mapper");
 
-traverse = require('traverse');
+app = angular.module('app', ['ui.codemirror']);
 
-Q = require('q');
+data = require("./data");
 
-console.log("Bang!", yaml, traverse, Q);
+app.controller('MainCtrl', [
+  '$scope', function($scope) {
+    var codemirrorExtraKeys;
+    codemirrorExtraKeys = window.CodeMirror.normalizeKeyMap({
+      "Ctrl-Space": "autocomplete",
+      Tab: function(cm) {
+        return cm.replaceSelection("  ");
+      }
+    });
+    $scope.codemirrorConfig = {
+      lineWrapping: false,
+      lineNumbers: true,
+      mode: 'yaml',
+      extraKeys: codemirrorExtraKeys,
+      viewportMargin: Infinity
+    };
+    $scope.mapping = data.mapping;
+    $scope.message = data.message;
+    $scope.currentTab = 'mapping';
+    return $scope.result = "Still no result";
+  }
+]);
 
 
-},{"js-yaml":7,"q":38,"traverse":39}],2:[function(require,module,exports){
+},{"./data":40,"./hl7mapper":41}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 if (typeof Object.create === 'function') {
@@ -12767,4 +12788,24 @@ var hasOwnProperty = Object.hasOwnProperty || function (obj, key) {
     return key in obj;
 };
 
-},{}]},{},[1]);
+},{}],40:[function(require,module,exports){
+module.exports.mapping = "$structure:\n  - ['', 'PID', ['*?', 'PD1'], ['*?', 'NK1']]\n  - ['?', 'PV1']\n\nresourceType: Bundle\ntype: transaction\nentry:\n  $filter: flatten\n  $value:\n    - transaction:\n        method: POST\n        url: /Patient\n      resource:\n        id: REFERENCE_PATIENT_ID\n        resourceType: Patient\n        multipleBirthInteger: $ PID.24\n        deceasedBoolean: $ PID.30\n        birthDate: $ PID.7 | dateTime\n        gender: $ PID.8 | translateCode(\"gender\")\n\n        name:\n          $foreach: PID.5 as name\n          $value:\n            period:\n              start: $ name.12 | dateTime\n              end: $ name.13 | dateTime\n\n            given:\n              $foreach: name.2 as given\n              $value: $ given | capitalize\n            middle:\n              $foreach: name.3 as middle\n              $value: $ middle | capitalize\n            family:\n              $foreach: name.1 as family\n              $value: $ family | capitalize\n            suffix:\n              $foreach: name.4 as suffix\n              $value: $ suffix\n            prefix:\n              $foreach: name.5 as prefix\n              $value: $ prefix\n            text: '{{name.5}} {{name.2}} {{name.3}} {{name.1}} {{name.4}} {{name.6}}'\n\n        address:\n          $foreach: PID.11 as addr\n          $value:\n            line:\n              - $ addr.1\n              - $ addr.2\n              - $ addr.3\n\n            city: $ addr.3\n            state: $ addr.4\n            postalCode: $ addr.5\n            country: $ addr.6\n            period:\n              start: $ addr.12 | dateTime\n              end: $ addr.13 | dateTime\n            text: \"{{addr.1}} {{addr.2}} {{addr.3}} {{addr.4}} {{addr.5}} {{addr.6}}\"\n\n        identifier:\n          $filter: flatten\n          $value:\n            - $foreach: PID.2, PID.3, PID.4, PID.18 as id\n              $value:\n                $if: id.1\n                value: $ id.1\n                system: $ id.4\n\n                period:\n                  start: $ id.7 | dateTime\n                  end: $ id.8 | dateTime\n\n                type:\n                  text:\n                    $case: id.path\n                    'PID.2': External ID\n                    'PID.3': Internal ID\n                    'PID.4': Alternate ID\n                    'PID.18': Account number\n\n            - $if: PID.19\n              value: $ PID.19\n              system: http://hl7.org/fhir/sid/us-ssn\n              type:\n                text: Social Security Number\n\n            - $if: PID.20.1 && PID.20.2\n              value: '{{PID.20.1}} {{PID.20.2}}'\n              system: urn:oid:2.16.840.1.113883.4.3.36\n              type:\n                text: Driver License\n\n        telecom:\n          $foreach: PID.13, PID.14 as tel\n          $value:\n            $if: tel.1\n            $value:\n              use:\n                $case: tel.path\n                'PID.13': home\n                'PID.14': work\n\n              value: $ tel.1\n              system: $ tel.3\n\n        contact:\n          $foreach: PID.NK1 as nk1\n          $value:\n            period:\n              start: $ nk1.8\n              end: $ nk1.9\n\n            gender: $ nk1.15 | translateCode(\"gender\")\n            relationship:\n              coding:\n                - code: $ nk1.3.1\n\n            name:\n              period:\n                start: $ nk1.2~.12 | dateTime\n                end: $ nk1.2~.13 | dateTime\n              use: $ nk1.2~.7 || \"official\"\n              given:\n                - $ nk1.2~.2\n              family:\n                - $ nk1.2~.1\n              middle:\n                - $ nk1.2~.3\n              suffix:\n                - $ nk1.2~.4\n              prefix:\n                - $ nk1.2~.5\n              text: '{{nk1.2~.5}} {{nk1.2~.2}} {{nk1.2~.3}} {{nk1.2~.1}} {{nk1.2~.4}} {{nk1.2~.6}}'\n\n            address:\n              line:\n                - $ nk1.4~.1\n                - $ nk1.4~.2\n                - $ nk1.4~.3\n\n              city: $ nk1.4~.3\n              state: $ nk1.4~.4\n              postalCode: $ nk1.4~.5\n              country: $ nk1.4~.6\n              period:\n                start: $ nk1.4~.12 | dateTime\n                end: $ nk1.4~.13 | dateTime\n\n              text: \"{{nk1.4~.1}} {{nk1.4~.2}} {{nk1.4~.3}} {{nk1.4~.4}} {{nk1.4~.5}} {{nk1.4~.6}}\"\n\n              type: $ nk1.4~.7\n              use: 'Mailing Address'\n\n    - transaction:\n        method: POST\n        url: /Encounter\n      resource:\n        resourceType: Encounter\n        class: $ PV1.2\n        identifier:\n          - value: $ PV1.19.1\n\n        participant:\n          $foreach: PV1.7, PV1.8, PV1.9, PV1.17 as physician\n          $value:\n            $if: physician.1\n            type:\n              codings:\n                - code:\n                    $case: physician.path\n                    'PV1.7': ATND\n                    'PV1.8': REF\n                    'PV1.9': CON\n                    'PV1.17': ADM\n                  system: http://hl7.org/fhir/v3/ParticipationType\n\n            period:\n            individual:\n              reference: \"PRACTITIONER_{{physician.1}}\"\n\n        patient:\n          reference: REFERENCE_PATIENT_ID\n\n        location:\n          location:\n            reference: \"LOCATION_{{ PV1.3 | md5 }}\"\n          status: active\n\n    - $filter: uniq(\"resource.id\")\n      $value:\n        $foreach: PV1.7, PV1.8, PV1.9, PV1.17 as physician\n        $value:\n          $if: physician.1\n          $value:\n            transaction:\n              method: POST\n              url: /Practitioner\n            resource:\n              id: \"PRACTITIONER_{{physician.1}}\"\n              resourceType: Practitioner\n              identifier:\n                - value: $ physician.1\n\n              name:\n                given:\n                  $foreach: physician.3 as given\n                  $value: $ given | capitalize\n                middle:\n                  $foreach: physician.4 as middle\n                  $value: $ middle | capitalize\n                family:\n                  $foreach: physician.2 as family\n                  $value: $ family | capitalize\n\n    - $if: PV1.3\n      transaction:\n          method: POST\n          url: /Location\n\n      resource:\n        $let:\n          locationStr:\n            $filter:\n              - compact\n              - join(\".\")\n\n            $value:\n              - $ PV1.3.7 | trim\n              - $ PV1.3.8 | trim\n              - $ PV1.3.2 | trim\n              - $ PV1.3.3 | trim\n\n        id: \"LOCATION_{{ PV1.3 | md5 }}\"\n        resourceType: Location\n        status: active\n        identifier:\n          - value: $ locationStr\n\n        name: $ locationStr";
+
+module.exports.message = "MSH|^~\&|MS4ADT|001|UST|001|20130716075007||ADT^A08|00000000012988788|P|2.3\nEVN|A08|20130716075004||ITOI|HIMACARRAM\nPID|1|010107127^^^MS4^PN^|160922^^^MS4^MR^001|160922^^^MS4^MR^001|WANDA^LUXENBURG^IVANOVNA^^||19330910|F||C|STRAWBERRY AVE^FOUR OAKS LODGE^ALBUKERKA^CA^98765^USA^^||(111)222-3333||ENG|W|CHR|11115555555^^^MS4001^AN^001|333-22-1111||||OKLAHOMA||||||20120812|Y\nPD1||||07302^DJANG^EIMING^^^|||U\nNK1|1|MOCK^LAWRENCE^E^^|Z|4357 COBBLESTONE LANE^^LA CANDADA^CA^91011^^|(818)790-4099||S|||SALESMAN|||KONICA BUSINESS MACHINE|M|M|19610429|||||||||PRE||||||||010061010^^^MS4^PN^||C||572-33-5959\nNK1|2|MOCK^RUSSEL^^^|Z|3420 LE BETHON ST^^SUNLAND^CA^91040^^|(818)249-3925||R||||||UNKNOWN||M||||||||||UNK||||||||000323302^^^MS4^PN^||T||          1\nPV1||I|TELE^ 581^ A^001^OCCPD|1|||01552^ANDERSON^CHARLES^A^^^MD^^^^^^^|||MED||||1|||01552^ANDERSON^CHARLES^A^^^MD^^^^^^^|I|666|0401|5||||||||N|||||||E|||001|OCCPD||||201307021300|201307091552|69206.42|69206.42\nDG1|1|I9|518.81|ACUTE RESPIRATOR FAILURE||A|||||||||0|||||||||||Y\nDG1|2|I9|518.84|ACUTE & CHR RESP FAILURE||D|||||||||1|||||||||||Y\nDG1|3|I9|599.0|URIN TRACT INFECTION NOS||D|||||||||2|||||||||||Y\nDG1|4|I9|427.31|ATRIAL FIBRILLATION||D|||||||||2|||||||||||Y\nDG1|5|I9|401.9|HYPERTENSION NOS||D|||||||||2|||||||||||Y\nDG1|6|I9|496|CHR AIRWAY OBSTRUCT NEC||D|||||||||2|||||||||||Y\nDG1|7|I9|244.9|HYPOTHYROIDISM NOS||D|||||||||2|||||||||||Y\nDRG|00208\nPR1|1|I9|9671|CONT INVAS MV-<96 HRS|20130702||||||31853^CRABB^JONATHAN^W^^MD\nPR1|2|I9|9604|INSERT ENDOTRACHEAL TUBE|20130702||||||31853^CRABB^JONATHAN^W^^MD\nPR1|3|I9|9394|NEBULIZER THERAPY|20130703||||||01552^ANDERSON^CHARLES^A^^MD\nPR1|4|I9|9390|NON-INVASIVE MECH VENT|20130706||||||01552^ANDERSON^CHARLES^A^^MD\nGT1|1|010107127^^^MS4^PN^|MOCK^WANDA^J^^|MOCK^LAWRENCE^E^^|2820 SYCAMORE AVE^TWELVE OAKS LODGE^MONTROSE^CA^91214^USA^|(818)249-3361||19301013|F||A|354-22-1840||||RETIRED|^^^^00000^|||||||20130711|||||0000007496|W||||||||Y|||CHR||||||||RETIRED||||||C\nIN1|1||0401|MEDICARE IP|^^^^     |||||||19951001|||MCR|MOCK^WANDA^J^^|A|19301013|2820 SYCAMORE AVE^TWELVE OAKS LODGE^MONTROSE^CA^91214^USA^^^|||1||||||||||||||354221840A|||||||F|^^^^00000^|N||||010107127\nIN2||354221840|0000007496^RETIRED|||354221840A||||||||||||||||||||||||||||||Y|||CHR||||W|||RETIRED|||||||||||||||||(818)249-3361||||||||C\nIN1|2||2320|AETNA PPO|PO BOX 14079^PO BOX 14079^LEXINGTON^KY^40512|||081140101400020|RETIRED|||20130101|||COM|MOCK^WANDA^J^^|A|19301013|2820 SYCAMORE AVE^TWELVE OAKS LODGE^MONTROSE^CA^91214^USA^^^|||2||||||||||||||811001556|||||||F|^^^^00000^|N||||010107127\nIN2||354221840|0000007496^RETIRED|||||||||||||||||||||||||||||||||Y|||CHR||||W|||RETIRED|||||||||||||||||(818)249-3361||||||||C";
+
+
+},{}],41:[function(require,module,exports){
+var Q, traverse, yaml;
+
+yaml = require('js-yaml');
+
+traverse = require('traverse');
+
+Q = require('q');
+
+module.exports.doMapping = function() {
+  return "hello world!";
+};
+
+
+},{"js-yaml":7,"q":38,"traverse":39}]},{},[1]);
