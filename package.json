@@ -4,10 +4,8 @@
   "dependencies": {
     "js-yaml": "latest",
     "traverse": "latest",
-    "node-rest-client": "latest",
-    "md5": "latest",
     "dateformat": "latest",
-    "q": "latest"
+    "js-md5": "latest"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3",

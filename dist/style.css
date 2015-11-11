@@ -4,7 +4,7 @@ h2 {
 }
 
 .nav-pills {
-  margin-bottom: 10px;
+  margin-left: 20px;
 }
 
 .editors textarea, .editors .CodeMirror {
@@ -14,4 +14,8 @@ h2 {
 
 .editors textarea {
   font-family: monospace;
+}
+
+.result pre {
+  max-height: 500px;
 }
