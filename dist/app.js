@@ -57,12 +57,22 @@ app.controller('MainCtrl', [
     });
     $scope.savePreset = function() {
       var name;
-      name = prompt("Preset name?");
-      return $scope.presets.$add({
-        name: name,
-        message: $scope.message,
-        mapping: $scope.mapping
-      });
+      while (true) {
+        name = prompt("Preset name?");
+        if (name === null || name.length > 0) {
+          break;
+        }
+      }
+      if (name !== null) {
+        return $scope.presets.$add({
+          name: name,
+          message: $scope.message
+        });
+      }
+    };
+    $scope.loadPreset = function(p) {
+      $scope.message = p.message;
+      return $scope.mapping = p.mapping;
     };
     return $scope.doMapping();
   }
@@ -1540,7 +1550,7 @@ function utf8ToBytes (string, units) {
       }
 
       // valid surrogate pair
-      codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
+      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
     } else if (leadSurrogate) {
       // valid bmp char, but last char was a lead
       if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
@@ -11896,8 +11906,7 @@ module.exports={
     }
   ],
   "directories": {},
-  "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.0.2.tgz",
-  "readme": "ERROR: No README data found!"
+  "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.0.2.tgz"
 }
 
 },{}],66:[function(require,module,exports){

@@ -47,12 +47,18 @@ app.controller 'MainCtrl', ['$scope', '$firebaseArray', ($scope, $firebaseArray)
     $scope.doMapping()
 
   $scope.savePreset = () ->
-    name = prompt("Preset name?")
+    loop
+      name = prompt("Preset name?")
+      break if name == null || name.length > 0 
 
-    $scope.presets.$add
-      name: name
-      message: $scope.message
-      mapping: $scope.mapping
+    if name != null 
+      $scope.presets.$add
+        name: name
+        message: $scope.message
+ 
+  $scope.loadPreset = (p) ->
+   $scope.message = p.message
+   $scope.mapping = p.mapping
 
   $scope.doMapping()
 ]
