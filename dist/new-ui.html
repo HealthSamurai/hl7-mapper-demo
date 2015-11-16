@@ -28,10 +28,17 @@
 
     <div class="header">
       <div class="header-text">
-        <a class="navbar-brand" href="#/">HL7 Mapping Demo</a>
-        by
-        <a href="#/">Health Samurai</a>
-        <div class="dropdown">
+        <div class="header-title">
+          <div>
+            <a class="header-title-heading" href="#/">HL7 Mapping Demo</a>
+          </div>
+
+          <div class="health-samurai">
+            <span>by</span>
+            <a href="http://health-samurai.io">Health Samurai</a>
+          </div>
+        </div>
+        <div class="dropdown header-presets">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Saved Presets <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li ng-repeat="p in presets">

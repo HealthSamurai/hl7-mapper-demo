@@ -38,11 +38,52 @@ body {
 
 .header {
   display: flex;
-  border-bottom: 5px solid #343436;
+  border-bottom: 5px solid rgba(0,0,0,0.05);
+  min-height: 50px;
+  padding: 5px 15px;
 }
 
 .header-text {
   flex: 3;
+  display: flex;
+  align-items: center;
+}
+
+.header-title-heading {
+  font-size: 21px;
+  font-weight: 700;
+  color: #333;
+}
+
+.header-title-heading:hover,
+.header-title-heading:active,
+.header-title-heading:focus {
+  text-decoration: none;
+}
+
+.health-samurai {
+  margin-top: -5px;
+}
+.health-samurai span {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.health-samurai a {
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px dashed #333;
+}
+
+.health-samurai a:hover {
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.header-presets {
+  margin-left: 30px;
 }
 
 .header-actions {
